@@ -186,21 +186,18 @@ function getLearnerData(course, ag, submissions) {
   // The parameter is an array of scores and returns the average
   function scoreAverage(submissions, ag) {
     let scoreAverage = 0;
-    if (submissions.learner_id === 125) {
-      // return (
-      //   (submissions[0].submission.score + submissions[1].submission.score) /
-      //   (ag.assignments[0].points_possible + ag.assignments[1].points_possible)
-      // );
-      scoreAverage += submissions.submission.score;
+    if (submissions[0].learner_id === 125) {
+      return (
+        (submissions[0].submission.score + submissions[1].submission.score) /
+        (ag.assignments[0].points_possible + ag.assignments[1].points_possible)
+      );
     }
-    if (submissions.learner_id === 132) {
-      // return (
-      //   (submissions[0].submission.score + submissions[1].submission.score) /
-      //   (ag.assignments[0].points_possible + ag.assignments[1].points_possible)
-      // );
-      scoreAverage += submissions.submission.score;
+    if (submissions[3].learner_id === 132) {
+      return (
+        (submissions[3].submission.score + submissions[4].submission.score) /
+        (ag.assignments[0].points_possible + ag.assignments[1].points_possible)
+      );
     }
-    return scoreAverage;
   }
   //-----------------------------------------------------------------------------//
   // here, we would process this data to achieve the desired result.
@@ -218,19 +215,6 @@ function getLearnerData(course, ag, submissions) {
   //     2: 0.833, // late: (140 - 15) / 150
   //   },
   // ];
-  let courseAssignment = ag.assignments;
-  const studentsScoresAndAverageArr = [];
-  for (let i = 0; i < submissions.length; i++) {
-    studentsScoresAndAverageArr[i] = {};
-    studentsScoresAndAverageArr[i].id = submissions[i].learner_id;
-    studentsScoresAndAverageArr[i].avg = scoreAverage(submissions[i], ag);
-    for (let j = 0; j < courseAssignment.length; j++) {
-      studentsScoresAndAverageArr[i][courseAssignment[j].id] = scorePrecentage(
-        submissions[i],
-        ag
-      );
-    }
-  }
 
   // studentsScoresAndAverageArr.push({
   //   id: submissions[i].learner_id,
@@ -241,25 +225,35 @@ function getLearnerData(course, ag, submissions) {
   //   2: learnerSubmissionScore2 / agAssignmentPointsPossible2,
   // });
 
-  // try {
-  //   if (agCourseId !== courseId) throw new SyntaxError("The input was invalid");
-  //   if (
-  //     agAssignmentPointsPossible0 === 0 ||
-  //     agAssignmentPointsPossible1 === 0 ||
-  //     agAssignmentPointsPossible2 === 0
-  //   )
-  //     throw new SyntaxError("There are no possible points");
-  //   if (
-  //     typeof agAssignmentPointsPossible0 !== "number" ||
-  //     typeof agAssignmentPointsPossible1 !== "number" ||
-  //     typeof agAssignmentPointsPossible2 !== "number"
-  //   )
-  //     throw new SyntaxError("Your input is not a number");
-  // } catch (error) {
-  //   console.log(`Uh ohhh!!! ${error}`);
-  // }
-
-  return studentsScoresAndAverageArr;
+  try {
+    if (agCourseId !== courseId) throw new SyntaxError("The input was invalid");
+    if (
+      agAssignmentPointsPossible0 === 0 ||
+      agAssignmentPointsPossible1 === 0 ||
+      agAssignmentPointsPossible2 === 0
+    )
+      throw new SyntaxError("There are no possible points");
+    if (
+      typeof agAssignmentPointsPossible0 !== "number" ||
+      typeof agAssignmentPointsPossible1 !== "number" ||
+      typeof agAssignmentPointsPossible2 !== "number"
+    )
+      throw new SyntaxError("Your input is not a number");
+    let courseAssignment = ag.assignments;
+    const studentsScoresAndAverageArr = [];
+    for (let i = 0; i < submissions.length; i++) {
+      studentsScoresAndAverageArr[i] = {};
+      studentsScoresAndAverageArr[i].id = submissions[i].learner_id;
+      studentsScoresAndAverageArr[i].avg = scoreAverage(submissions, ag);
+      for (let j = 0; j < courseAssignment.length; j++) {
+        studentsScoresAndAverageArr[i][courseAssignment[j].id] =
+          scorePrecentage(submissions[i], ag);
+      }
+    }
+    return studentsScoresAndAverageArr;
+  } catch (error) {
+    console.log(`Uh ohhh!!! ${error}`);
+  }
 }
 
 const result = getLearnerData(CourseInfo, AssignmentGroup, LearnerSubmissions);
