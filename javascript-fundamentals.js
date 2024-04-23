@@ -104,22 +104,6 @@ const LearnerSubmissions = [
 // ];
 //-------------------------------------------------------------------------//
 function getLearnerData(course, ag, submissions) {
-  //-------------------Helper Functions--------------------//
-  // The parameters are the learners submitted score and the possible point
-  function scorePrecentage(submitted_score, points_possible) {
-    return submitted_score / points_possible;
-  }
-  // The parameter is an array of scores and returns the average
-  function scoreAverage(submitted_score, points_possible) {
-    let possiblePoints = 0;
-    let score = 0;
-    for (let i = 0; i < submitted_score.length; i++) {
-      score += submitted_score[i];
-      possiblePoints += points_possible[i];
-    }
-    return score / possiblePoints;
-  }
-  //-----------------------------------------------------------------------------//
   // Line for Course info
   const courseId = course.id; // 451
   const courseName = course.name; // Introduction to JavaScript
@@ -186,50 +170,102 @@ function getLearnerData(course, ag, submissions) {
   const learnerSubmissionScore4 = submissions[4].submission.score; // 140
   //=============================================================================//
 
+  //----------------------------- Helper Functions ------------------------------//
+  // The parameters are the learners submitted score and the possible point
+  function scorePrecentage(submissions, ag) {
+    if (submissions.assignment_id === 1) {
+      return submissions.submission.score / ag.assignments[0].points_possible;
+    }
+    if (submissions.assignment_id === 2) {
+      return submissions.submission.score / ag.assignments[1].points_possible;
+    }
+    if (submissions.assignment_id === 3) {
+      return submissions.submission.score / ag.assignments[2].points_possible;
+    }
+  }
+  // The parameter is an array of scores and returns the average
+  function scoreAverage(submissions, ag) {
+    let scoreAverage = 0;
+    if (submissions.learner_id === 125) {
+      // return (
+      //   (submissions[0].submission.score + submissions[1].submission.score) /
+      //   (ag.assignments[0].points_possible + ag.assignments[1].points_possible)
+      // );
+      scoreAverage += submissions.submission.score;
+    }
+    if (submissions.learner_id === 132) {
+      // return (
+      //   (submissions[0].submission.score + submissions[1].submission.score) /
+      //   (ag.assignments[0].points_possible + ag.assignments[1].points_possible)
+      // );
+      scoreAverage += submissions.submission.score;
+    }
+    return scoreAverage;
+  }
+  //-----------------------------------------------------------------------------//
+  // here, we would process this data to achieve the desired result.
+  // const result = [
+  //   {
+  //     id: 125,
+  //     avg: 0.985, // (47 + 150) / (50 + 150)
+  //     1: 0.94, // 47 / 50
+  //     2: 1.0, // 150 / 150
+  //   },
+  //   {
+  //     id: 132,
+  //     avg: 0.82, // (39 + 125) / (50 + 150)
+  //     1: 0.78, // 39 / 50
+  //     2: 0.833, // late: (140 - 15) / 150
+  //   },
+  // ];
+  let courseAssignment = ag.assignments;
   const studentsScoresAndAverageArr = [];
-  // let studentsScoresAndAverageObj = {};
-  // let spreadSubmission = [...submissions];
-  try {
-    if (agCourseId !== courseId) throw "The input was invalid";
-    if (
-      agAssignmentPointsPossible0 === 0 ||
-      agAssignmentPointsPossible1 === 0 ||
-      agAssignmentPointsPossible2 === 0
-    )
-      throw "There are no possible points";
-    if (
-      typeof agAssignmentPointsPossible0 !== "number" ||
-      typeof agAssignmentPointsPossible1 !== "number" ||
-      typeof agAssignmentPointsPossible2 !== "number"
-    )
-      throw "Your input is not a number";
-  } catch (error) {
-    console.log(`Uh ohhh!!! ${error}`);
+  for (let i = 0; i < submissions.length; i++) {
+    studentsScoresAndAverageArr[i] = {};
+    studentsScoresAndAverageArr[i].id = submissions[i].learner_id;
+    studentsScoresAndAverageArr[i].avg = scoreAverage(submissions[i], ag);
+    for (let j = 0; j < courseAssignment.length; j++) {
+      studentsScoresAndAverageArr[i][courseAssignment[j].id] = scorePrecentage(
+        submissions[i],
+        ag
+      );
+    }
   }
 
+  // studentsScoresAndAverageArr.push({
+  //   id: submissions[i].learner_id,
+  //   avg:
+  //     (learnerSubmissionScore0 + learnerSubmissionScore1) /
+  //     (agAssignmentPointsPossible0 + agAssignmentPointsPossible1),
+  //   1: scorePrecentages / agAssignmentPointsPossible0,
+  //   2: learnerSubmissionScore2 / agAssignmentPointsPossible2,
+  // });
+
+  // try {
+  //   if (agCourseId !== courseId) throw new SyntaxError("The input was invalid");
+  //   if (
+  //     agAssignmentPointsPossible0 === 0 ||
+  //     agAssignmentPointsPossible1 === 0 ||
+  //     agAssignmentPointsPossible2 === 0
+  //   )
+  //     throw new SyntaxError("There are no possible points");
+  //   if (
+  //     typeof agAssignmentPointsPossible0 !== "number" ||
+  //     typeof agAssignmentPointsPossible1 !== "number" ||
+  //     typeof agAssignmentPointsPossible2 !== "number"
+  //   )
+  //     throw new SyntaxError("Your input is not a number");
+  // } catch (error) {
+  //   console.log(`Uh ohhh!!! ${error}`);
+  // }
+
   return studentsScoresAndAverageArr;
-  // return agAssignmentPointsPossible0;
 }
 
 const result = getLearnerData(CourseInfo, AssignmentGroup, LearnerSubmissions);
 
 console.log(result);
 
-// here, we would process this data to achieve the desired result.
-// const result = [
-//   {
-//     id: 125,
-//     avg: 0.985, // (47 + 150) / (50 + 150)
-//     1: 0.94, // 47 / 50
-//     2: 1.0, // 150 / 150
-//   },
-//   {
-//     id: 132,
-//     avg: 0.82, // (39 + 125) / (50 + 150)
-//     1: 0.78, // 39 / 50
-//     2: 0.833, // late: (140 - 15) / 150
-//   },
-// ];
 // let submitted_scoreId1 = 47;
 // let points_possibleId1 = 50;
 // function scorePrecentageId1(submitted_score, points_possible) {
@@ -241,7 +277,7 @@ console.log(result);
 //   points_possibleId1
 // );
 // console.log(testScorePercantageId1);
-//=============================================================//
+// //=============================================================//
 // let submitted_scoreId2 = 150;
 // let points_possibleId2 = 150;
 // function scorePrecentageId1(submitted_score, points_possible) {
@@ -253,7 +289,7 @@ console.log(result);
 //   points_possibleId2
 // );
 // console.log(testScorePercantageId2);
-//=============================================================//
+// //=============================================================//
 // let totalSubmittedScore = [testScorePercantageId1, testScorePercantageId2];
 // let totalPointsPossible = [points_possibleId1, points_possibleId2];
 
@@ -268,4 +304,4 @@ console.log(result);
 // }
 // let totalAverage = totalScoreAverage(totalSubmittedScore, totalPointsPossible);
 // console.log(totalAverage);
-//=============================================================//
+// //=============================================================//
